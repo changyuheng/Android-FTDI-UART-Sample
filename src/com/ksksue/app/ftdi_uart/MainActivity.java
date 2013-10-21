@@ -1,11 +1,14 @@
 /*
- * Copyright (C) 2013 Keisuke SUZUKI
- * Licensed under the Apache License, Version 2.0
+ * Copyright (C) 2013
+ * Licensed under the License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * This code is checked by Galaxy S II and FT232RL
  */
 package com.ksksue.app.ftdi_uart;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -17,9 +20,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.CheckBox;
 
 import com.ftdi.j2xx.D2xxManager;
 import com.ftdi.j2xx.FT_Device;
@@ -31,7 +37,7 @@ public class MainActivity extends Activity {
     private static D2xxManager ftD2xx = null;
     private FT_Device ftDev;
 
-    static final int READBUF_SIZE  = 256;
+    static final int READBUF_SIZE  = 512;
     byte[] rbuf  = new byte[READBUF_SIZE];
     char[] rchar = new char[READBUF_SIZE];
     int mReadSize=0;
@@ -41,25 +47,59 @@ public class MainActivity extends Activity {
     Button btOpen;
     Button btWrite;
     Button btClose;
-
-    boolean mThreadIsStopped = true;
+    CheckBox cFT4232;
+    CheckBox cFT2232;
+    Spinner spBaudrate;
+    Spinner spDevPort;
+    
     Handler mHandler = new Handler();
     Thread mThread;
-
+    boolean mThreadIsStopped;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mThreadIsStopped = true;
         tvRead = (TextView) findViewById(R.id.tvRead);
         etWrite = (EditText) findViewById(R.id.etWrite);
-
         btOpen = (Button) findViewById(R.id.btOpen);
         btWrite = (Button) findViewById(R.id.btWrite);
         btClose = (Button) findViewById(R.id.btClose);
-
+        cFT4232 = (CheckBox) findViewById(R.id.cFT4232);
+        cFT2232 = (CheckBox) findViewById(R.id.cFT2232);
+        spBaudrate = (Spinner) findViewById(R.id.sp_Brate);
+        spDevPort = (Spinner) findViewById(R.id.spDevPort);       
         updateView(false);
 
+		List<String> BrateList = new ArrayList<String>();
+		BrateList.add("9600");
+		BrateList.add("38400");
+		BrateList.add("115200");
+
+		List<String> DportList = new ArrayList<String>();
+		DportList.add("0");
+		DportList.add("1");
+		DportList.add("2");
+		DportList.add("3");
+		DportList.add("4");
+		DportList.add("5");		
+
+		ArrayAdapter<String> BrateAdapter = new ArrayAdapter<String>
+        (this, android.R.layout.simple_spinner_item,BrateList);
+
+		ArrayAdapter<String> DporAdapter = new ArrayAdapter<String>
+        (this, android.R.layout.simple_spinner_item,DportList);		
+
+		BrateAdapter.setDropDownViewResource
+        (android.R.layout.simple_spinner_dropdown_item);
+
+		DporAdapter.setDropDownViewResource
+        (android.R.layout.simple_spinner_dropdown_item);		
+		
+		spBaudrate.setAdapter(BrateAdapter);
+		spDevPort.setAdapter(DporAdapter);
+		
         try {
             ftD2xx = D2xxManager.getInstance(this);
         } catch (D2xxManager.D2xxException ex) {
@@ -76,7 +116,7 @@ public class MainActivity extends Activity {
         registerReceiver(mUsbReceiver, filter);
 
     }
-
+    
     public void onClickOpen(View v) {
         openDevice();
     }
@@ -105,8 +145,8 @@ public class MainActivity extends Activity {
 
     @Override
     public void onDestroy() {
+    	closeDevice();
         super.onDestroy();
-        mThreadIsStopped = true;
     }
 
 /*    @Override
@@ -118,11 +158,14 @@ public class MainActivity extends Activity {
 */
 
     private void openDevice() {
-        if(ftDev != null) {
+    	String writeBR = String.valueOf(spBaudrate.getSelectedItem());
+    	String dev_port= String.valueOf(spDevPort.getSelectedItem());
+
+    	if(ftDev != null) {
             if(ftDev.isOpen()) {
                 if(mThreadIsStopped) {
                     updateView(true);
-                    SetConfig(9600, (byte)8, (byte)1, (byte)0, (byte)0);
+                    SetConfig(Integer.valueOf(writeBR), (byte)8, (byte)1, (byte)0, (byte)0);
                     ftDev.purge((byte) (D2xxManager.FT_PURGE_TX | D2xxManager.FT_PURGE_RX));
                     ftDev.restartInTask();
                     new Thread(mLoop).start();
@@ -134,8 +177,6 @@ public class MainActivity extends Activity {
         int devCount = 0;
         devCount = ftD2xx.createDeviceInfoList(this);
 
-        Log.d(TAG, "Device number : "+ Integer.toString(devCount));
-
         D2xxManager.FtDeviceInfoListNode[] deviceList = new D2xxManager.FtDeviceInfoListNode[devCount];
         ftD2xx.getDeviceInfoList(devCount, deviceList);
 
@@ -144,17 +185,35 @@ public class MainActivity extends Activity {
         }
 
         if(ftDev == null) {
-            ftDev = ftD2xx.openByIndex(this, 0);
+        	if(cFT2232.isChecked()==true && cFT4232.isChecked()==false){
+                ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));        		
+        	}
+        	else if(cFT2232.isChecked()==false && cFT4232.isChecked()==true){       		
+                ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));
+        	}
+        	else{
+        		return;
+        	}
+        		
         } else {
             synchronized (ftDev) {
-                ftDev = ftD2xx.openByIndex(this, 0);
+            	// 4232: 0~3, 2232:4~5
+            	if(cFT2232.isChecked()==true && cFT4232.isChecked()==false){
+                    ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));        		
+            	}
+            	else if(cFT2232.isChecked()==false && cFT4232.isChecked()==true){       		
+                    ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));
+            	}
+            	else{
+            		return;
+            	}            	
             }
         }
 
         if(ftDev.isOpen()) {
             if(mThreadIsStopped) {
                 updateView(true);
-                SetConfig(9600, (byte)8, (byte)1, (byte)0, (byte)0);
+                SetConfig(Integer.valueOf(writeBR), (byte)8, (byte)1, (byte)0, (byte)0);
                 ftDev.purge((byte) (D2xxManager.FT_PURGE_TX | D2xxManager.FT_PURGE_RX));
                 ftDev.restartInTask();
                 new Thread(mLoop).start();

@@ -8,40 +8,72 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <EditText
-        android:id="@+id/etWrite"
+    <requestFocus />
+
+    <CheckBox
+        android:id="@+id/cFT2232"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:ems="10" />
+        android:text="FT2232" />
+
+    <CheckBox
+        android:id="@+id/cFT4232"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="FT4232" />
 
     <Button
         android:id="@+id/btWrite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/etWrite"
+        android:layout_alignLeft="@+id/cFT2232"
+        android:layout_below="@+id/btClose"
         android:onClick="onClickWrite"
         android:text="Write" />
+
+    <Spinner
+        android:id="@+id/sp_Brate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/cFT2232"
+        android:layout_below="@+id/cFT2232" />
+
+    <EditText
+        android:id="@+id/etWrite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btWrite"
+        android:layout_toRightOf="@+id/btWrite"
+        android:ems="10" />
 
     <TextView
         android:id="@+id/tvRead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btWrite"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/btOpen"
+        android:layout_below="@+id/btWrite"
+        android:layout_marginTop="15dp"
         android:text="Read Data : " />
+
+    <Spinner
+        android:id="@+id/spDevPort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/sp_Brate"
+        android:layout_below="@+id/sp_Brate" />
 
     <Button
         android:id="@+id/btOpen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/etWrite"
+        android:layout_below="@+id/spDevPort"
+        android:layout_toLeftOf="@+id/etWrite"
         android:onClick="onClickOpen"
         android:text="Open" />
 
@@ -49,8 +81,9 @@
         android:id="@+id/btClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/tvRead"
-        android:layout_toRightOf="@+id/btOpen"
+        android:layout_alignBaseline="@+id/btOpen"
+        android:layout_alignBottom="@+id/btOpen"
+        android:layout_alignLeft="@+id/etWrite"
         android:onClick="onClickClose"
         android:text="Close" />
 
