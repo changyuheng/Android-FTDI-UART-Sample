@@ -18,6 +18,7 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -110,10 +111,10 @@ public class MainActivity extends Activity {
             Log.i(TAG,"setVIDPID Error");
         }
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        registerReceiver(mUsbReceiver, filter);
+        //IntentFilter filter = new IntentFilter();
+        //filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        //filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        //registerReceiver(mUsbReceiver, filter);
 
     }
     
@@ -121,24 +122,35 @@ public class MainActivity extends Activity {
         openDevice();
     }
 
-
     public void onClickWrite(View v) {
-        if(ftDev == null) {
-            return;
-        }
 
-        if(ftDev.isOpen() == false) {
-            Log.e(TAG, "onClickWrite : Device is not open");
-            return;
-        }
+    	btWrite.setEnabled(false);
+    	new Thread(new Runnable() {
+    	    public void run() {
+    	    	if(ftDev == null) {
+    	            return;
+    	        }
+    	        if(ftDev.isOpen() == false) {
+    	            Log.e(TAG, "onClickWrite : Device is not open");
+    	            return;
+    	        }
+    	        ftDev.setLatencyTimer((byte)16);
 
-        ftDev.setLatencyTimer((byte)16);
-
-        String writeString = etWrite.getText().toString();
-        byte[] writeByte = writeString.getBytes();
-        ftDev.write(writeByte, writeString.length());
+    	        String writeString = etWrite.getText().toString();
+    	        byte[] writeByte = writeString.getBytes();
+    	        ftDev.write(writeByte, writeString.length());
+    	        handler.sendEmptyMessage(0);
+    	    }
+    	  }).start();
     }
 
+    private Handler handler = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		btWrite.setEnabled(true);
+        }
+    };
+    
     public void onClickClose(View v) {
         closeDevice();
     }
@@ -367,7 +379,7 @@ public class MainActivity extends Activity {
     }
 
     // done when ACTION_USB_DEVICE_ATTACHED
-    @Override
+/*    @Override
     protected void onNewIntent(Intent intent) {
         openDevice();
     };
@@ -382,6 +394,6 @@ public class MainActivity extends Activity {
                 closeDevice();
             }
         }
-    };
+    };*/
 
 }
