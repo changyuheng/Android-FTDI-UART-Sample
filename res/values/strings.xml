@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">FTDI_UART_Sample</string>
+    <string name="app_name">FTDI Demo</string>
     <string name="action_settings">Settings</string>
 </resources>

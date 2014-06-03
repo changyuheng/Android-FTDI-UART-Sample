@@ -2,7 +2,7 @@
  * Copyright (C) 2013
  * Licensed under the License, Version 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * This code is checked by Galaxy S II and FT232RL
  */
 package com.ksksue.app.ftdi_uart;
@@ -33,7 +33,7 @@ import com.ftdi.j2xx.FT_Device;
 import com.ksksue.app.fpga_fifo.R;
 
 public class MainActivity extends Activity {
-    private final static String TAG = "FPGA_FIFO Activity";
+    private final static String TAG = "FTDIDemo";
 
     private static D2xxManager ftD2xx = null;
     private FT_Device ftDev;
@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
     CheckBox cFT2232;
     Spinner spBaudrate;
     Spinner spDevPort;
-    
+
     Handler mHandler = new Handler();
     Thread mThread;
     boolean mThreadIsStopped;
@@ -70,37 +70,37 @@ public class MainActivity extends Activity {
         cFT4232 = (CheckBox) findViewById(R.id.cFT4232);
         cFT2232 = (CheckBox) findViewById(R.id.cFT2232);
         spBaudrate = (Spinner) findViewById(R.id.sp_Brate);
-        spDevPort = (Spinner) findViewById(R.id.spDevPort);       
+        spDevPort = (Spinner) findViewById(R.id.spDevPort);
         updateView(false);
 
-		List<String> BrateList = new ArrayList<String>();
-		BrateList.add("9600");
-		BrateList.add("38400");
-		BrateList.add("115200");
+        List<String> BrateList = new ArrayList<String>();
+        BrateList.add("9600");
+        BrateList.add("38400");
+        BrateList.add("115200");
 
-		List<String> DportList = new ArrayList<String>();
-		DportList.add("0");
-		DportList.add("1");
-		DportList.add("2");
-		DportList.add("3");
-		DportList.add("4");
-		DportList.add("5");		
+        List<String> DportList = new ArrayList<String>();
+        DportList.add("0");
+        DportList.add("1");
+        DportList.add("2");
+        DportList.add("3");
+        DportList.add("4");
+        DportList.add("5");
 
-		ArrayAdapter<String> BrateAdapter = new ArrayAdapter<String>
+        ArrayAdapter<String> BrateAdapter = new ArrayAdapter<String>
         (this, android.R.layout.simple_spinner_item,BrateList);
 
-		ArrayAdapter<String> DporAdapter = new ArrayAdapter<String>
-        (this, android.R.layout.simple_spinner_item,DportList);		
+        ArrayAdapter<String> DporAdapter = new ArrayAdapter<String>
+        (this, android.R.layout.simple_spinner_item,DportList);
 
-		BrateAdapter.setDropDownViewResource
+        BrateAdapter.setDropDownViewResource
         (android.R.layout.simple_spinner_dropdown_item);
 
-		DporAdapter.setDropDownViewResource
-        (android.R.layout.simple_spinner_dropdown_item);		
-		
-		spBaudrate.setAdapter(BrateAdapter);
-		spDevPort.setAdapter(DporAdapter);
-		
+        DporAdapter.setDropDownViewResource
+        (android.R.layout.simple_spinner_dropdown_item);
+
+        spBaudrate.setAdapter(BrateAdapter);
+        spDevPort.setAdapter(DporAdapter);
+
         try {
             ftD2xx = D2xxManager.getInstance(this);
         } catch (D2xxManager.D2xxException ex) {
@@ -110,70 +110,56 @@ public class MainActivity extends Activity {
         if(!ftD2xx.setVIDPID(0x0403, 0xada1)) {
             Log.i(TAG,"setVIDPID Error");
         }
-
-        //IntentFilter filter = new IntentFilter();
-        //filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        //filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        //registerReceiver(mUsbReceiver, filter);
-
     }
-    
+
     public void onClickOpen(View v) {
         openDevice();
     }
 
     public void onClickWrite(View v) {
 
-    	btWrite.setEnabled(false);
-    	new Thread(new Runnable() {
-    	    public void run() {
-    	    	if(ftDev == null) {
-    	            return;
-    	        }
-    	        if(ftDev.isOpen() == false) {
-    	            Log.e(TAG, "onClickWrite : Device is not open");
-    	            return;
-    	        }
-    	        ftDev.setLatencyTimer((byte)16);
+        btWrite.setEnabled(false);
+        new Thread(new Runnable() {
+            public void run() {
+                if(ftDev == null) {
+                    return;
+                }
+                if(ftDev.isOpen() == false) {
+                    Log.e(TAG, "onClickWrite : Device is not open");
+                    return;
+                }
+                ftDev.setLatencyTimer((byte)16);
 
-    	        String writeString = etWrite.getText().toString();
-    	        byte[] writeByte = writeString.getBytes();
-    	        ftDev.write(writeByte, writeString.length());
-    	        handler.sendEmptyMessage(0);
-    	    }
-    	  }).start();
+                String writeString = etWrite.getText().toString();
+                byte[] writeByte = writeString.getBytes();
+                ftDev.write(writeByte, writeString.length());
+                handler.sendEmptyMessage(0);
+            }
+          }).start();
     }
 
     private Handler handler = new Handler() {
-    	@Override
-    	public void handleMessage(Message msg) {
-    		btWrite.setEnabled(true);
+        @Override
+        public void handleMessage(Message msg) {
+            btWrite.setEnabled(true);
         }
     };
-    
+
     public void onClickClose(View v) {
         closeDevice();
     }
 
     @Override
     public void onDestroy() {
-    	closeDevice();
+        closeDevice();
         super.onDestroy();
     }
 
-/*    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-*/
-
     private void openDevice() {
-    	String writeBR = String.valueOf(spBaudrate.getSelectedItem());
-    	String dev_port= String.valueOf(spDevPort.getSelectedItem());
+        String writeBR = String.valueOf(spBaudrate.getSelectedItem());
+        String dev_port= String.valueOf(spDevPort.getSelectedItem());
 
-    	if(ftDev != null) {
+        if(ftDev != null) {
             if(ftDev.isOpen()) {
                 if(mThreadIsStopped) {
                     updateView(true);
@@ -197,28 +183,28 @@ public class MainActivity extends Activity {
         }
 
         if(ftDev == null) {
-        	if(cFT2232.isChecked()==true && cFT4232.isChecked()==false){
-                ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));        		
-        	}
-        	else if(cFT2232.isChecked()==false && cFT4232.isChecked()==true){       		
+            if(cFT2232.isChecked()==true && cFT4232.isChecked()==false){
                 ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));
-        	}
-        	else{
-        		return;
-        	}
-        		
+            }
+            else if(cFT2232.isChecked()==false && cFT4232.isChecked()==true){
+                ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));
+            }
+            else{
+                return;
+            }
+
         } else {
             synchronized (ftDev) {
-            	// 4232: 0~3, 2232:4~5
-            	if(cFT2232.isChecked()==true && cFT4232.isChecked()==false){
-                    ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));        		
-            	}
-            	else if(cFT2232.isChecked()==false && cFT4232.isChecked()==true){       		
+                // 4232: 0~3, 2232:4~5
+                if(cFT2232.isChecked()==true && cFT4232.isChecked()==false){
                     ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));
-            	}
-            	else{
-            		return;
-            	}            	
+                }
+                else if(cFT2232.isChecked()==false && cFT4232.isChecked()==true){
+                    ftDev = ftD2xx.openByIndex(this, Integer.valueOf(dev_port));
+                }
+                else{
+                    return;
+                }
             }
         }
 
@@ -244,11 +230,6 @@ public class MainActivity extends Activity {
                     break;
                 }
 
-/*                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                }
-*/
                 synchronized (ftDev) {
                     readSize = ftDev.getQueueStatus();
                     if(readSize>0) {
@@ -377,23 +358,4 @@ public class MainActivity extends Activity {
         // TODO : flow ctrl: XOFF/XOM
         ftDev.setFlowControl(flowCtrlSetting, (byte) 0x0b, (byte) 0x0d);
     }
-
-    // done when ACTION_USB_DEVICE_ATTACHED
-/*    @Override
-    protected void onNewIntent(Intent intent) {
-        openDevice();
-    };
-
-    BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-                // never come here(when attached, go to onNewIntent)
-                openDevice();
-            } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                closeDevice();
-            }
-        }
-    };*/
-
 }
