@@ -129,7 +129,6 @@ public class MainActivity extends Activity {
                 try {
                     inputBytes = inputString.getBytes(charsetName);
                 } catch (UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
