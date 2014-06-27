@@ -30,12 +30,12 @@
     </string-array>
     <string-array name="code_page">
         <item>Chinese</item>
-        <item>Japan</item>
-        <item>Portuguese</item>
-        <item>Nordic</item>
-        <item>Turkish</item>
-        <item>Greece</item>
-        <item>Cyrillic, Russian</item>
-        <item>Slavonic, Latin II</item>
+        <item>Japanese</item>
+        <item>Portuguese (to-do)</item>
+        <item>Nordic (to-do)</item>
+        <item>Turkish (to-do)</item>
+        <item>Greece (to-do)</item>
+        <item>Cyrillic, Russian (to-do)</item>
+        <item>Slavonic, Latin II (to-do)</item>
     </string-array>
 </resources>

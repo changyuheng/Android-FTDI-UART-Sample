@@ -112,24 +112,41 @@ public class MainActivity extends Activity {
                 mFTDevice.setLatencyTimer((byte) 16);
 
                 String inputString = mInputEditText.getText().toString();
-                String charsetName = "";
                 String currentSelectedCharset = mCodePageSpinner.getSelectedItem().toString();
                 byte[] codePageCommand = null;
+                byte[] inputBytes = null;
 
                 if (currentSelectedCharset.equals("Chinese")) {
-                    charsetName = "Big5";
                     codePageCommand = new byte[] {
-                        (byte) 0x1B, (byte) 0x74, (byte) 0x00
+                        (byte) 0x1C, (byte) 0x26, (byte) 0x1B, (byte) 0x74, (byte) 0x00
                     };
+                    try {
+                        inputBytes = inputString.getBytes("Big5");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                } else if (currentSelectedCharset.equals("Japanese")) {
+                    codePageCommand = new byte[] {
+                        (byte) 0x1C, (byte) 0x2e, (byte) 0x1B, (byte) 0x74, (byte) 0x01
+                    };
+                    inputBytes = new byte[inputString.length()];
+                    for (int i = 0; i < inputString.length(); i++) {
+                        char c = inputString.charAt(i);
+                        if (c <= 0x7F) {
+                            inputBytes[i] = (byte) c;
+                            continue;
+                        }
+
+                        String s = inputString.substring(i, i + 1);
+                        if (CodeTable.JAPANESE.containsKey(s)) {
+                            inputBytes[i] = CodeTable.JAPANESE.get(
+                                    inputString.substring(i, i + 1)).byteValue();
+                        } else {
+                            inputBytes[i] = (byte) 0x3F;
+                        }
+                    }
                 } else {
                     // TODO : Implement other charset support
-                }
-
-                byte[] inputBytes = null;
-                try {
-                    inputBytes = inputString.getBytes(charsetName);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
                 }
 
                 if (inputBytes != null) {
