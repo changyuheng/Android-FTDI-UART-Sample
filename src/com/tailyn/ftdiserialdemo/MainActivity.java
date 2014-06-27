@@ -127,7 +127,7 @@ public class MainActivity extends Activity {
                     }
                 } else if (currentSelectedCharset.equals("Japanese")) {
                     codePageCommand = new byte[] {
-                        (byte) 0x1C, (byte) 0x2e, (byte) 0x1B, (byte) 0x74, (byte) 0x01
+                        (byte) 0x1C, (byte) 0x2E, (byte) 0x1B, (byte) 0x74, (byte) 0x01
                     };
                     inputBytes = new byte[inputString.length()];
                     for (int i = 0; i < inputString.length(); i++) {
