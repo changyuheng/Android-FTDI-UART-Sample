@@ -1,12 +1,10 @@
-Android-FTDI-UART-Sample
-========================
+# Android FTDI Serial Demo
 
-This project is a sample of Android USB-Serial monitor application using official FTDI Driver D2XX.
-This code is checked by using Galaxy S II and FT232RL.
+![screenschot](https://raw.githubusercontent.com/changyuheng/android-ftdi-serial-demo/master/screenshot.png)
 
-このプロジェクトは、USBシリアルモニタアプリのサンプルプロジェクトです。
-FTDIの公式ドライバ D2XX を使っています。
-Galaxy SIIとFT232RLモジュールを使って動作確認をしました。
-
-FTDI official web page:
+### FTDI official web page
 [http://www.ftdichip.com/Android.htm](http://www.ftdichip.com/Android.htm)
+
+### Reference
+* This project originated from [https://github.com/ksksue/Android-FTDI-UART-Sample](https://github.com/ksksue/Android-FTDI-UART-Sample)
+* [FTDI official website](http://www.ftdichip.com/Android.htm)
